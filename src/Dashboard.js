@@ -9,6 +9,8 @@ import Chip from '@material-ui/core/Chip';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 
+import {Context} from './Store';
+
 
 const useStyles = makeStyles(theme => ({
   root: {
@@ -40,6 +42,15 @@ const useStyles = makeStyles(theme => ({
 const Dashboard = () => {
   const classes = useStyles();
 
+  // Context store
+  const {allChats, sendChatAction, user} = React.useContext(Context);
+  
+  // console.log({allChats});
+
+  const topics = Object.keys(allChats);
+
+  //local state
+  const [activeTopic, onChangeActiveTopics] = React.useState(topics[0]);
   const [textValue, onTextValueChange] =  React.useState('');
 
   return (
@@ -49,24 +60,23 @@ const Dashboard = () => {
             Chat App
         </Typography>
         <Typography variant="h6" component="h6">
-          Topic placeholder
+          {activeTopic}
         </Typography>
         <div className={classes.flex}>
             <div className={classes.topicsWindow}>
             <List>
                 {
-                    ['topic'].map(topic => (
-                        <ListItem key={topic} button>
+                    topics.map(topic => (
+                        <ListItem onClick={e => onChangeActiveTopics(e.target.innerText) } key={topic} button>
                             <ListItemText primary={topic} />
                         </ListItem>
                     ))
                 }
-                
             </List>
             </div>
             <div className={classes.chatWindow}>
                 {
-                    [{from: 'User', msg: 'hello'}].map((chat, index) => (
+                    allChats[activeTopic].map((chat, index) => (
                         <div key={index} className={classes.flex}>
                             <Chip label={chat.from} className={classes.chip} />
                             <Typography varient="p">{chat.msg}</Typography>
@@ -82,7 +92,10 @@ const Dashboard = () => {
                 value={textValue}
                 onChange={e => onTextValueChange(e.target.value)}
                 margin="normal" />
-            <Button variant="contained" color="primary" className={classes.button}>
+            <Button variant="contained" color="primary" className={classes.button} onClick={() => {
+              sendChatAction({from: user, msg: textValue, topic: activeTopic});
+              onTextValueChange('');
+            }}>
                 send
             </Button>
         </div>
